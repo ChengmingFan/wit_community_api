@@ -3,10 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const cors = require('cors')
 var sassMiddleware = require('node-sass-middleware');
+let users = require('./routes/users')
+let AutherticatePolicy = require('./policies/AuthenticatePolicy')
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -14,6 +15,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+app.use(cors())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -26,8 +28,15 @@ app.use(sassMiddleware({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.get('/', function(req, res, next) {
+  res.render('index', { title: 'WIT Community' })
+})
+app.get('/users', users.getAllUsers)
+app.post('/user/register',users.register)
+app.get('/user/:id', users.getUserById)
+app.put('/user/update', AutherticatePolicy.isValidToken, users.updateUser)
+app.delete('/user/delete/:id', users.deleteUser)
+app.post('/user/login', users.login)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
