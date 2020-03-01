@@ -151,7 +151,7 @@ module.exports = {
         })
     },
     getPopular(req, res) {
-        Post.find({}).sort({'updatedTime': -1,'commentCount': -1}).exec(function (err, posts) {
+        Post.find({}).sort({'commentCount': -1, 'updatedTime': -1}).exec(function (err, posts) {
             if (err)
                 res.send(err)
             res.send({code: 1, posts: posts})

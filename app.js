@@ -7,6 +7,7 @@ const cors = require('cors')
 var sassMiddleware = require('node-sass-middleware');
 let users = require('./routes/users')
 let posts = require('./routes/posts')
+let comments = require('./routes/comments')
 let AutherticatePolicy = require('./policies/AuthenticatePolicy')
 
 
@@ -46,6 +47,8 @@ app.get('/subarea/:subarea',posts.getSubareaPosts)
 app.get('/search/:keyword', posts.searchPosts)
 app.put('/post/update',  posts.updatePost)
 app.delete('/post/delete/:id', posts.deletePost)
+app.post('/comment', comments.comment)
+app.delete('/comment/delete/:id', comments.deleteComment)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
