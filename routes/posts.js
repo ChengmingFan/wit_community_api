@@ -12,7 +12,8 @@ module.exports = {
             content: req.body.content,
             creatorId: req.body.creatorId,
             createdTime: time,
-            updatedTime: time
+            updatedTime: time,
+            subarea: req.body.subarea
         })
         post.save((err, docs) => {
             if (err) {
@@ -99,8 +100,14 @@ module.exports = {
                 res.send(err)
             res.send({code: 1, posts: posts})
         })
-    }
-    ,
+    },
+    getSubareaPosts(req,res) {
+        Post.find({subarea: req.params.subarea}).sort({'createdTime': -1}).exec(function (err,posts) {
+            if(err)
+                res.send(err)
+            res.send({code: 1, posts: posts})
+        })
+    },
     // fuzzy search
     searchPosts(req, res) {
         const keyword = req.params.keyword
@@ -141,6 +148,13 @@ module.exports = {
                 res.send({code: 1, msg: 'Successful to update!', post: post})
             else
                 res.send({code: 0, msg: 'No this post'})
+        })
+    },
+    getPopular(req, res) {
+        Post.find({}).sort({'updatedTime': -1,'commentCount': -1}).exec(function (err, posts) {
+            if (err)
+                res.send(err)
+            res.send({code: 1, posts: posts})
         })
     }
 }

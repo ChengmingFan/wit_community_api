@@ -32,6 +32,10 @@ let PostSchema = new mongoose.Schema({
     updatedTime: {
         type: Date,
         required: true
+    },
+    subarea: {
+        type: String,
+        required: true
     }
 },
 {collection: 'posts'})
