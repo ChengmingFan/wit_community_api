@@ -7,5 +7,10 @@
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <h1>文件上传</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input id="files" type="file" name="file" accept="image/jpeg,image/png" multiple/> <!-- 这里的multiple属性是允许多文件上传的，单文件上传可以不写此属性（最好都写上）-->
+      <input type="submit" value="上传"/>
+    </form>
   </body>
 </html>

@@ -67,6 +67,7 @@ module.exports = {
                         as: 'user'
                     }
                 },
+                {$sort:{createdTime:-1}},
                 {$unwind: '$user'},
                 {
                     $project: {
@@ -111,8 +112,9 @@ module.exports = {
     // fuzzy search
     searchPosts(req, res) {
         const keyword = req.params.keyword
+
         const reg = new RegExp(keyword, 'i')
-        Post.find({title: {$regex: reg}}).sort({'createdTime': -1}).exec(function (err, posts) {
+        Post.find({title: {$regex: reg }}).sort({'createdTime': -1}).exec(function (err, posts) {
             if (err) {
                 res.send({code: 0, msg: err})
             } else {
