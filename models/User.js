@@ -14,6 +14,26 @@ let UserSchema = new Schema({
         min: 2,
         max: 20
     },
+    gender: {
+        type: String,
+        required: false
+    },
+    country: {
+        type: String,
+        required: false
+    },
+    birthday: {
+        type: Date,
+        required: false
+    },
+    bio: {
+        type:String,
+        required: false
+    },
+    avatarUrl: {
+        type: String,
+        required: false
+    },
     email: {
         type: String,
         required: true,
