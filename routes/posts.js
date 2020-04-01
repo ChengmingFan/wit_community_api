@@ -50,7 +50,7 @@ module.exports = {
                         content: '$content',
                         createdTime: '$createdTime',
                         updateTime: '$updatedTime',
-                        author: '$user.username',
+                        author: '$user',
                         creatorId: '$creatorId'
                     }
                 }
@@ -74,8 +74,10 @@ module.exports = {
                         _id: '$_id',
                         content: '$content',
                         createdTime: '$createdTime',
-                        author: '$user.username',
-                        creatorId: '$creatorId'
+                        author: '$user',
+                        creatorId: '$creatorId',
+                        likeCount: '$likeCount',
+                        commentCount: '$commentCount'
                     }
                 }
             ])
@@ -95,18 +97,77 @@ module.exports = {
             })
         }
     },
-    getAllPosts(req, res) {
-        Post.find({}).sort({'createdTime': -1}).exec(function (err, posts) {
-            if (err)
-                res.send(err)
-            res.send({code: 1, posts: posts})
+    async getAllPosts(req, res) {
+        var posts = await Post.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'creatorId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $sort: {'updatedTime': -1}
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    _id: '$_id',
+                    viewCount: '$viewCount',
+                    commentCount: '$commentCount',
+                    title: '$title',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    updateTime: '$updatedTime',
+                    author: '$user',
+                    creatorId: '$creatorId'
+                }
+            }
+        ])
+
+        res.json({
+            code: 1,
+            posts: posts
         })
+
     },
-    getSubareaPosts(req,res) {
-        Post.find({subarea: req.params.subarea}).sort({'createdTime': -1}).exec(function (err,posts) {
-            if(err)
-                res.send(err)
-            res.send({code: 1, posts: posts})
+    async getSubareaPosts(req,res) {
+
+        var posts = await Post.aggregate([
+            {
+                $match: {subarea: req.params.subarea}
+            },
+            {
+                $sort: {'createdTime': -1}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'creatorId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    _id: '$_id',
+                    viewCount: '$viewCount',
+                    commentCount: '$commentCount',
+                    title: '$title',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    updateTime: '$updatedTime',
+                    author: '$user',
+                    creatorId: '$creatorId'
+                }
+            }
+        ])
+
+        res.json({
+            code: 1,
+            posts: posts
         })
     },
     // fuzzy search
@@ -152,11 +213,47 @@ module.exports = {
                 res.send({code: 0, msg: 'No this post'})
         })
     },
-    getPopular(req, res) {
-        Post.find({}).sort({'commentCount': -1, 'updatedTime': -1}).exec(function (err, posts) {
-            if (err)
-                res.send(err)
-            res.send({code: 1, posts: posts})
+    async getPopular(req, res) {
+        var posts = await Post.aggregate([
+            {
+                $sort: {'commentCount': -1, 'updatedTime': -1}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'creatorId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    _id: '$_id',
+                    viewCount: '$viewCount',
+                    commentCount: '$commentCount',
+                    title: '$title',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    updateTime: '$updatedTime',
+                    author: '$user',
+                    creatorId: '$creatorId'
+                }
+            }
+        ])
+        res.json({
+            code: 1,
+            posts: posts
+        })
+    },
+
+    async getPostByUserId (req, res) {
+        Post.find({creatorId: req.params.id}).sort({'createdTime': -1}).exec(function (err, posts) {
+            if (err) {
+                res.send({code: 0, msg: err})
+            } else {
+                res.send({code: 1, posts: posts})
+            }
         })
     }
 }

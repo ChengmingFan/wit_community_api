@@ -20,6 +20,14 @@ let CommentSchema = new mongoose.Schema({
     createdTime: {
         type: Date,
         required: true
+    },
+    likeCount: {
+        type: Number,
+        default: 0
+    },
+    commentCount: {
+        type: Number,
+        default: 0
     }
 },
 {collection: 'comments'})

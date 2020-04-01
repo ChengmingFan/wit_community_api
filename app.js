@@ -43,6 +43,7 @@ app.delete('/user/delete/:id', users.deleteUser)
 app.post('/user/login', users.login)
 app.post('/post', posts.post)
 app.get('/post/:id', posts.getPostDetail)
+app.get('/post/user/:id', posts.getPostByUserId)
 app.get('/all', posts.getAllPosts)
 app.get('/popular',posts.getPopular)
 app.get('/subarea/:subarea',posts.getSubareaPosts)
@@ -50,10 +51,11 @@ app.get('/search/:keyword', posts.searchPosts)
 app.put('/post/update',  posts.updatePost)
 app.delete('/post/delete/:id', posts.deletePost)
 app.post('/comment', comments.comment)
+app.get('/comment/user/:id', comments.getCommentByUserId)
+app.get('/comments/:id',comments.getComments)
 app.delete('/comment/delete/:id', comments.deleteComment)
 app.post('/upload', upload.upload)
 
-///todo:存储在硬盘上，Nginx方向代理
 
 
 // catch 404 and forward to error handler

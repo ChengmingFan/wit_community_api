@@ -1,5 +1,7 @@
 let Comment = require('../models/Comment')
 let Post = require('../models/Post')
+let mongoose = require('mongoose')
+let ObjectId = mongoose.Types.ObjectId
 
 module.exports = {
     async comment(req, res) {
@@ -16,16 +18,28 @@ module.exports = {
                 res.send({code: 0, msg: 'Failed to post'})
             } else {
                 res.send({code: 1, msg: 'Successful to comment'})
-                //update commentCount of the post
-                Post.update(
-                    {_id: docs.parentId},
-                    //commetnCount add 1
-                    {$inc: {commentCount: 1}},
-                    function (err, docs) {
-                        if (err)
-                            res.send(err)
-                    }
-                )
+                if(req.body.type === 0) {
+                    //update commentCount of the post
+                    Post.update(
+                        {_id: docs.parentId},
+                        //commetnCount add 1
+                        {$inc: {commentCount: 1}},
+                        function (err, docs) {
+                            if (err)
+                                res.send(err)
+                        }
+                    )
+                } else {
+                    Comment.update(
+                        {_id: docs.parentId},
+                        //commetnCount add 1
+                        {$inc: {commentCount: 1}},
+                        function (err, docs) {
+                            if (err)
+                                res.send(err)
+                        }
+                    )
+                }
             }
         })
     },
@@ -46,16 +60,72 @@ module.exports = {
                 res.send({code: 0, msg: 'No Related Data'})
         })
     },
-    getComment(req, res) {
+    async getComments(req, res) {
         const id = req.params.id
-        Comment.findById(id, function (err, comment) {
-            if (err) {
-                res.send({code: 0, msg: 'Failed to get data: ' + err})
-            } else if (comment) {
-                res.send({code: 1, comment: comment})
-            } else {
-                res.send({code: 0, msg: 'No Related Data'})
+
+        var comments = await Comment.aggregate([
+            {
+                $match: {'parentId': ObjectId(id)}
+            },
+            {
+                $sort: {'createdTime': 1}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'creatorId',
+                    foreignField: "_id",
+                    as: 'user'
+                }
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    _id: '$_id',
+                    likeCount: '$likeCount',
+                    commentCount: '$commentCount',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    author: '$user'
+                }
             }
+        ])
+        res.json({
+            code: 1,
+            comments: comments
+        })
+
+    },
+    async getCommentByUserId (req, res){
+        var comments = await Comment.aggregate([
+            {
+                $match: {'creatorId': ObjectId(req.params.id)}
+            },
+            {
+                $sort: {'createdTime': -1}
+            },
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: 'parentId',
+                    foreignField: '_id',
+                    as: 'post'
+                }
+            },
+            {$unwind: '$post'},
+            {
+                $project: {
+                    _id: '$_id',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    creatorId: '$creatorId',
+                    post: '$post'
+                }
+            }
+        ])
+        res.json({
+            code: 1,
+            comments: comments
         })
     }
 }
