@@ -55,7 +55,8 @@ let UserSchema = new Schema({
         type: Number,
         required: true,
         default: 0
-    }
+    },
+    likedComments: []
 },
 {collection: 'users'})
 

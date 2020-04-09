@@ -1,5 +1,6 @@
 let Comment = require('../models/Comment')
 let Post = require('../models/Post')
+let User = require('../models/User')
 let mongoose = require('mongoose')
 let ObjectId = mongoose.Types.ObjectId
 
@@ -10,7 +11,8 @@ module.exports = {
             parentId: req.body.parentId,
             content: req.body.content,
             creatorId: req.body.creatorId,
-            createdTime: time
+            createdTime: time,
+            ref: req.body.ref,
         })
         comment.save((err, docs) => {
             if (err) {
@@ -86,7 +88,8 @@ module.exports = {
                     commentCount: '$commentCount',
                     content: '$content',
                     createdTime: '$createdTime',
-                    author: '$user'
+                    author: '$user',
+                    ref: '$ref'
                 }
             }
         ])
@@ -126,6 +129,37 @@ module.exports = {
         res.json({
             code: 1,
             comments: comments
+        })
+    },
+    async likeComment (req,res) {
+        let commentId = ObjectId(req.body.commentId)
+        let userId = ObjectId(req.body.userId)
+        let type = req.body.type
+        await User.findById(userId,function (err, user) {
+            if(err){
+                res.send({code: 0, msg: err})
+            }
+            if (user != null){
+                if (type === 1){
+                    user.likedComments.push(commentId)
+                } else {
+                    user.likedComments.forEach((item,index) => {
+                        if(item.toString() === commentId.toString()){
+                            user.likedComments.splice(index,1)
+                        }
+                    })
+                }
+                Comment.updateOne({'_id': commentId}, {$inc: {'likeCount': type}}, (err,docs) => {
+                    if (err){
+                        res.send({code: 0, msg: err})
+                    }
+                })
+                user.save()
+                res.json({
+                    code: 1,
+                    likedComments: user.likedComments
+                })
+            }
         })
     }
 }

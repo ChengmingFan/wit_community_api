@@ -2,6 +2,8 @@ let User = require('../models/User')
 const config = require('../config')
 const Jwt = require('jsonwebtoken')
 const express = require('express')
+let mongoose = require('mongoose')
+let ObjectId = mongoose.Types.ObjectId
 
 function tokenSign({id, username}) {
     try {
@@ -58,7 +60,7 @@ module.exports = {
     },
     async updateUser(req, res) {
         const user = new User(req.body)
-        const id = user._id
+        const id = ObjectId(user._id)
         const doc = await User.findById(id)
         if (doc) {
             doc.set(user)

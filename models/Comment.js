@@ -28,6 +28,10 @@ let CommentSchema = new mongoose.Schema({
     commentCount: {
         type: Number,
         default: 0
+    },
+    ref: {
+        type: {},
+        required: false
     }
 },
 {collection: 'comments'})
