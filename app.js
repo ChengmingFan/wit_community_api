@@ -8,6 +8,7 @@ var sassMiddleware = require('node-sass-middleware');
 let users = require('./routes/users')
 let posts = require('./routes/posts')
 let comments = require('./routes/comments')
+let notifications = require('./routes/notification')
 let AutherticatePolicy = require('./policies/AuthenticatePolicy')
 let upload  = require('./routes/upload')
 
@@ -19,7 +20,7 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(cors())
+app.use(cors({credentials: true,origin: true}))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -31,6 +32,7 @@ app.use(sassMiddleware({
   sourceMap: true
 }));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.get('/', function(req, res, next) {
   res.render('index', { title: 'WIT Community' })
@@ -56,8 +58,9 @@ app.get('/comments/:id',comments.getComments)
 app.post('/comment/like',comments.likeComment)
 app.delete('/comment/delete/:id', comments.deleteComment)
 app.post('/upload', upload.upload)
-
-
+app.get('/notification/num/:id',notifications.getUnreadNotificationNum)
+app.get('/notification/:id',notifications.getNotifications)
+app.get('/notification/mark/:id',notifications.markRead)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

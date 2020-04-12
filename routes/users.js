@@ -4,6 +4,7 @@ const Jwt = require('jsonwebtoken')
 const express = require('express')
 let mongoose = require('mongoose')
 let ObjectId = mongoose.Types.ObjectId
+const session = require('express-session')
 
 function tokenSign({id, username}) {
     try {
@@ -108,6 +109,5 @@ module.exports = {
         } else {
             res.send({code: 0, msg: 'No this user'})
         }
-    },
-
+    }
 }

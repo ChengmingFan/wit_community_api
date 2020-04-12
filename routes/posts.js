@@ -77,7 +77,8 @@ module.exports = {
                         author: '$user',
                         creatorId: '$creatorId',
                         likeCount: '$likeCount',
-                        commentCount: '$commentCount'
+                        commentCount: '$commentCount',
+                        parentId: '$parentId'
                     }
                 }
             ])
