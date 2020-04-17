@@ -3,13 +3,13 @@ let mongoose = require('mongoose')
 let ObjectId = mongoose.Types.ObjectId
 
 module.exports = {
-    async createNotification(type,senderId,senderName,receiverId,parentId,contentId,content){
+    async createNotification(type,senderId,senderName,receiverId,postId,contentId,content){
         const notification = new Notification({
             type: type,
             senderId: senderId,
             senderName: senderName,
             receiverId: receiverId,
-            parentId:parentId,
+            postId:postId,
             contentId: contentId,
             content: content,
             createdTime: new Date()
@@ -21,12 +21,12 @@ module.exports = {
             }
         })
     },
-    async deleteNotification (type,senderId,receiverId,parentId,contentId){
+    async deleteNotification (type,senderId,receiverId,postId,contentId){
         Notification.deleteOne({
             type: type,
             senderId: senderId,
             receiverId: receiverId,
-            parentId: parentId,
+            parentId: postId,
             contentId: contentId
         },function (err) {
             if (err) {
@@ -59,14 +59,27 @@ module.exports = {
             }
         })
     },
-    async markRead (req,res) {
+    async markAllRead (req, res) {
         let userId = ObjectId(req.params.id)
         await Notification.updateMany({
-            receiverId: userId,
-            status: 1
+            receiverId: userId
+        },
+        {
+            $set: {status: 1}
         })
         res.send({
             code: 1
+        })
+    },
+    async markOneRead (req, res) {
+        let notificationId = ObjectId(req.params.id)
+        Notification.updateOne({_id: notificationId},{$set: {status: 1}},function (err,docs) {
+            if (err) {
+                console.log(err)
+            }
+            res.send({
+                code: 1
+            })
         })
     }
 }

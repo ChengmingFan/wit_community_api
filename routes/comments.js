@@ -7,16 +7,20 @@ let ObjectId = mongoose.Types.ObjectId
 
 module.exports = {
     async comment(req, res) {
+        let ref = null
+        if(req.body.ref !== undefined) {
+            ref = ObjectId(req.body.ref)
+        }
         let receiverId = ObjectId(req.body.receiverId)
-        let senderId = ObjectId(req.body.senderId)
+        let senderId = ObjectId(req.body.creatorId)
         let senderName = req.body.senderName
         const time = new Date()
         const comment = new Comment({
             parentId: req.body.parentId,
             content: req.body.content,
-            creatorId: req.body.creatorId,
+            creatorId: senderId,
             createdTime: time,
-            ref: req.body.ref,
+            ref: ref
         })
         comment.save((err, dbComment) => {
             if (err) {
@@ -34,17 +38,22 @@ module.exports = {
                         function (err, docs) {
                             if (err)
                                 res.send(err)
-                            notification.createNotification(2,senderId,senderName,receiverId,req.body.parentId,dbComment._id,docs.title)
+                            if (req.body.creatorId !== req.body.receiverId) {
+                                notification.createNotification(2, senderId, senderName, receiverId, req.body.parentId, dbComment._id, docs.title)
+                            }
                         }
                     )
                 } else {
-                    Comment.update(
-                        {_id: docs.parentId},
+                    Comment.findOneAndUpdate(
+                        {_id: dbComment.parentId},
                         //commetnCount add 1
                         {$inc: {commentCount: 1}},
                         function (err, docs) {
                             if (err)
                                 res.send(err)
+                            if (req.body.creatorId !== req.body.receiverId) {
+                                notification.createNotification(3, senderId, senderName, receiverId, req.body.ref, dbComment._id, docs.content)
+                            }
                         }
                     )
                 }
@@ -138,6 +147,7 @@ module.exports = {
         })
     },
     async likeComment (req,res) {
+        let postId = ObjectId(req.body.postId)
         let commentId = ObjectId(req.body.commentId)
         let receiverId = ObjectId(req.body.receiverId)
         let content = req.body.content
@@ -150,14 +160,16 @@ module.exports = {
             if (user != null){
                 if (type === 1){
                     user.likedComments.push(commentId)
-                    notification.createNotification(1,user._id,user.username,receiverId,commentId,null,content)
+                    if (req.body.userId !== req.body.receiverId) {
+                        notification.createNotification(1, user._id, user.username, receiverId, postId, commentId, content)
+                    }
                 } else {
                     user.likedComments.forEach((item,index) => {
                         if(item.toString() === commentId.toString()){
                             user.likedComments.splice(index,1)
                         }
                     })
-                    notification.deleteNotification(1, userId,receiverId,commentId,null)
+                    notification.deleteNotification(1, userId,receiverId,postId,commentId)
                 }
                 Comment.updateOne({'_id': commentId}, {$inc: {'likeCount': type}}, (err,docs) => {
                     if (err){

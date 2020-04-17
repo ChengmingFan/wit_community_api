@@ -9,6 +9,7 @@ let users = require('./routes/users')
 let posts = require('./routes/posts')
 let comments = require('./routes/comments')
 let notifications = require('./routes/notification')
+let messages = require('./routes/messages')
 let AutherticatePolicy = require('./policies/AuthenticatePolicy')
 let upload  = require('./routes/upload')
 
@@ -60,7 +61,13 @@ app.delete('/comment/delete/:id', comments.deleteComment)
 app.post('/upload', upload.upload)
 app.get('/notification/num/:id',notifications.getUnreadNotificationNum)
 app.get('/notification/:id',notifications.getNotifications)
-app.get('/notification/mark/:id',notifications.markRead)
+app.get('/notification/markAll/:id',notifications.markAllRead)
+app.get('/notification/mark/:id',notifications.markOneRead)
+app.post('/message/create',messages.createMessage)
+app.post('/message/get',messages.getMessage)
+app.get('/message/num/:id', messages.getUnreadMessageNum)
+app.get('/message/messenger/:id',messages.getMessengerList)
+app.post('/message/read',messages.markRead)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

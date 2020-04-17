@@ -17,7 +17,7 @@ let NotificationSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    parentId: {
+    postId: {
         type: mongoose.Types.ObjectId,
         required: true
     },
