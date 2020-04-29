@@ -32,6 +32,10 @@ let CommentSchema = new mongoose.Schema({
     ref: {
         type: {},
         required: false
+    },
+    repliedUser: {
+        type: {},
+        required: false
     }
 },
 {collection: 'comments'})

@@ -8,8 +8,15 @@ let ObjectId = mongoose.Types.ObjectId
 module.exports = {
     async comment(req, res) {
         let ref = null
+        let repliedUser = null
         if(req.body.ref !== undefined) {
             ref = ObjectId(req.body.ref)
+        }
+        if (req.body.repliedUserId !== undefined) {
+            repliedUser = {
+                userId: ObjectId(req.body.repliedUserId),
+                username: req.body.repliedUserName
+            }
         }
         let receiverId = ObjectId(req.body.receiverId)
         let senderId = ObjectId(req.body.creatorId)
@@ -20,7 +27,8 @@ module.exports = {
             content: req.body.content,
             creatorId: senderId,
             createdTime: time,
-            ref: ref
+            ref: ref,
+            repliedUser: repliedUser
         })
         comment.save((err, dbComment) => {
             if (err) {
@@ -104,7 +112,8 @@ module.exports = {
                     content: '$content',
                     createdTime: '$createdTime',
                     author: '$user',
-                    ref: '$ref'
+                    ref: '$ref',
+                    repliedUser: '$repliedUser'
                 }
             }
         ])

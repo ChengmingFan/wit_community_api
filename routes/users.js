@@ -86,8 +86,7 @@ module.exports = {
             else
                 res.send({code: 0, msg: 'No Related Data'})
         })
-    }
-    ,
+    },
     async login(req, res) {
         const {username, password} = req.body
         const dbUser = await User.findOne({username})
@@ -109,5 +108,42 @@ module.exports = {
         } else {
             res.send({code: 0, msg: 'No this user'})
         }
+    },
+    async getUserByGoogleId (req, res) {
+        let gmail = req.body.email
+        console.log(gmail)
+
+        User.findOne({email: gmail},async function (err,guser) {
+            if (err)
+                console.log(err)
+            else if (guser) {
+                res.send({
+                    code: 1,
+                    user: guser,
+                    token: tokenSign(guser)
+                })
+            } else {
+                let user = new User({
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: "google123",
+                    createdTime: new Date()
+                })
+                user.save((err, user) => {
+                    if (err)
+                        res.send({
+                            code:0,
+                            msg: err
+                        })
+                    else {
+                        res.send({
+                            code: 1,
+                            user: user,
+                            token: tokenSign(user)
+                        })
+                    }
+                })
+            }
+        })
     }
 }

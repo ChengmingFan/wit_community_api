@@ -67,7 +67,7 @@ module.exports = {
                         as: 'user'
                     }
                 },
-                {$sort:{createdTime:-1}},
+                {$sort:{createdTime:1}},
                 {$unwind: '$user'},
                 {
                     $project: {
@@ -172,11 +172,42 @@ module.exports = {
         })
     },
     // fuzzy search
-    searchPosts(req, res) {
+    async searchPosts(req, res) {
         const keyword = req.params.keyword
 
         const reg = new RegExp(keyword, 'i')
-        Post.find({title: {$regex: reg }}).sort({'createdTime': -1}).exec(function (err, posts) {
+        Post.aggregate([
+            {
+                $match: {
+                    title: {$regex: reg}
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'creatorId',
+                    foreignField: '_id',
+                    as: 'user'
+                }
+            },
+            {
+                $sort: {'updatedTime': -1}
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    _id: '$_id',
+                    viewCount: '$viewCount',
+                    commentCount: '$commentCount',
+                    title: '$title',
+                    content: '$content',
+                    createdTime: '$createdTime',
+                    updateTime: '$updatedTime',
+                    author: '$user',
+                    creatorId: '$creatorId'
+                }
+            }
+        ],function (err, posts) {
             if (err) {
                 res.send({code: 0, msg: err})
             } else {

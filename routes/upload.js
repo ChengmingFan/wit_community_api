@@ -56,6 +56,7 @@ module.exports = {
                     msg: 'failed to upload'
                 })
             }
+            url = 'http://8.208.14.10/images/'
         })
     }
 }

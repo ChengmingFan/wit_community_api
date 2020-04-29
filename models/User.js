@@ -56,7 +56,11 @@ let UserSchema = new Schema({
         required: true,
         default: 0
     },
-    likedComments: []
+    likedComments: [],
+    gid: {
+        type: String,
+        required: false
+    }
 },
 {collection: 'users'})
 

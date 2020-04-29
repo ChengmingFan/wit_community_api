@@ -41,6 +41,7 @@ app.get('/', function(req, res, next) {
 app.get('/users', users.getAllUsers)
 app.post('/user/register',users.register)
 app.get('/user/:id', users.getUserById)
+app.post('/user/gid',users.getUserByGoogleId)
 app.put('/user/update', users.updateUser)
 app.delete('/user/delete/:id', users.deleteUser)
 app.post('/user/login', users.login)
